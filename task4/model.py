@@ -1,5 +1,3 @@
-# This serves as a template which will guide you through the implementation of this task.  It is advised
-# to first read the whole template and get a sense of the overall structure of the code before trying to fill in any of the TODO gaps
 # First, we import necessary libraries:
 import pandas as pd
 import numpy as np
@@ -68,44 +66,6 @@ class Net(nn.Module):
         return x
 
 
-class Net2(nn.Module):
-    """
-    The model class, which defines our feature extractor used in pretraining.
-    """
-    def __init__(self):
-        """
-        The constructor of the model.
-        """
-        super().__init__()
-        # TODO: Define the architecture of the model. It should be able to be trained on pretraing data
-        # and then used to extract features from the training and test data.
-
-        # New Code:
-        self.fc1 = nn.Linear(64, 32)
-        self.fc2 = nn.Linear(32,16)
-        self.fc3 = nn.Linear(16, 8)
-        self.out = nn.Linear(8, 1)
-
-    def forward(self, x):
-        """
-        The forward pass of the model.
-
-        input: x: torch.Tensor, the input to the model
-
-        output: x: torch.Tensor, the output of the model
-        """
-        # TODO: Implement the forward pass of the model, in accordance with the architecture
-        # defined in the constructor.
-
-        # New Code:
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        x = self.out(x)
-
-        return x
-
-
 
 def make_feature_extractor(x, y, batch_size=256, eval_size=1000):
     """
@@ -138,15 +98,12 @@ def make_feature_extractor(x, y, batch_size=256, eval_size=1000):
     optimizer = torch.optim.Adam(model.parameters(), lr= stepsize, weight_decay=0.001)
     criterion = nn.MSELoss()
     losses = []
-    #valLossFunction = torch.nn.MSELoss()
+    
 
     for i in range(n_epochs):
         model.train()
         optimizer.zero_grad()
         target = model.forward(x_tr)
-        #print("This is the shape of x_tr:", x_tr.shape)
-        #print("This is the shape of y_pred:", y_pred.shape)
-        #print("This is the shape of y_tr:", y_tr.shape)
 
         target = target.squeeze(-1)
         loss = criterion(target, y_tr)
@@ -250,45 +207,6 @@ if __name__ == '__main__':
     pipe = Pipeline(steps = [('extractor', PretrainedFeatureClass(feature_extractor='pretrain')), ('final', regression_model)])
     pipe.fit(x_train, y_train)
     y_pred = pipe.predict(x_test)
-
-    #Now we try it with neural network
-    '''
-    x_train_embedding = feature_extractor(x_train)
-    x_train_embedding = torch.tensor(x_train_embedding, dtype=torch.float)
-    x_test_embedding = feature_extractor(x_test)
-    x_test_embedding = torch.tensor(x_test_embedding, dtype=torch.float)
-
-    Big_model.eval()
-
-    model = Net2()
-    model.train()
-
-    n_epochs = 300
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-    criterion = nn.MSELoss()
-    losses = []
-    y_tr = torch.tensor(y_train, dtype = torch.float)
-
-    for i in range(n_epochs):
-        y_pred_NN = model.forward(x_train_embedding)
-        # print("This is the shape of x_tr:", x_tr.shape)
-        # print("This is the shape of y_pred:", y_pred.shape)
-        # print("This is the shape of y_tr:", y_tr.shape)
-
-        y_pred_NN = y_pred_NN.squeeze(-1)
-        loss = criterion(y_pred_NN, y_tr)
-        losses.append(loss)
-        print(f'epoch: {i:2}  loss: {loss.item():10.8f}')
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-    model.eval()
-    y_pred = model(x_test_embedding).detach().numpy().squeeze(-1)
-    print(y_pred.shape)
-    print(x_test.shape[0])
-    '''
 
 
     assert y_pred.shape == (x_test.shape[0],)
