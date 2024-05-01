@@ -107,7 +107,6 @@ def make_feature_extractor(x, y, batch_size=256, eval_size=1000):
 
         target = target.squeeze(-1)
         loss = criterion(target, y_tr)
-        print(f'epoch: {i:2}  loss: {loss.item():10.8f}')
         
         optimizer.zero_grad()
         loss.backward()
@@ -117,8 +116,7 @@ def make_feature_extractor(x, y, batch_size=256, eval_size=1000):
         model.eval()
         valOutput = model.forward(x_val).squeeze(-1)
         val_loss = criterion(valOutput, y_val)
-        print(f'epoch: {i:2}  validation error: {val_loss.item():10.8f}')
-
+        
     def make_features(x):
         """
         This function extracts features from the training and test data, used in the actual pipeline 
@@ -177,7 +175,6 @@ def get_regression_model():
     """
     # TODO: Implement the regression model. It should be able to be trained on the features extracted
     # by the feature extractor.
-    # model = None
 
     # New Code:
     model = RidgeCV(alphas=[0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 1000])
