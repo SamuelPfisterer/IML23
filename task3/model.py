@@ -1,5 +1,3 @@
-# This serves as a template which will guide you through the implementation of this task.  It is advised
-# to first read the whole template and get a sense of the overall structure of the code before trying to fill in any of the TODO gaps
 # First, we import necessary libraries:
 import numpy as np
 from torchvision import transforms
@@ -32,16 +30,13 @@ def generate_embeddings():
 ])
 
     train_dataset = datasets.ImageFolder(root="dataset/", transform=train_transforms)
-    # Hint: adjust batch_size and num_workers to your PC configuration, so that you don't 
-    # run out of memory
     batchsize=16
     train_loader = DataLoader(dataset=train_dataset,
                               batch_size=batchsize,
                               shuffle=False,
                               pin_memory=True, num_workers=4)
 
-    # TODO: define a model for extraction of the embeddings (Hint: load a pretrained model,
-    #  more info here: https://pytorch.org/vision/stable/models.html)
+    # TODO: define a model for extraction of the embeddings
     # Original Line:
     # model = nn.Module()
 
@@ -52,39 +47,19 @@ def generate_embeddings():
     model.fc = torch.nn.Sequential()
 
     embeddings = []
-    embedding_size = 2048 # Dummy variable, replace with the actual embedding size once you 
-    # pick your model
+    embedding_size = 2048 
     num_images = len(train_dataset)
     embeddings = np.zeros((num_images, embedding_size))
-    # TODO: Use the model to extract the embeddings. Hint: remove the last layers of the 
-    # model to access the embeddings the model generates. 
     
-    # New Code:
-    '''
-    with torch.no_grad():
-        for input, _ in train_loader:
-            # input_tensor = train_transforms(input)
-            # input_batch = input_tensor.unsqueeze(0)
-            # output = model(input_batch)
-            output = model(input)
-            np.append(embeddings, output.numpy())
-    '''
     counter = 0
     with torch.no_grad():
         for input, _ in train_loader:
             output = model(input)
             for i in range(batchsize):
                 embeddings[counter*batchsize + i] = output.numpy()[i]
-            # print(output.numpy())
-            # print(output.numpy()[0])
-            # print(output.size())
-            # embeddings[0] = output.numpy()[0]
             counter += 1
             print(counter)
-            # break
-    # print(embeddings)    
-    
-    # Have to uncomment this:
+                
     np.save('dataset/embeddings.npy', embeddings)
 
 # Output: X, y
@@ -106,29 +81,23 @@ def get_data(file, train=True):
     with open(file) as f:
         for line in f:
             triplets.append(line)
-    # print(triplets)
     # generate training data from triplets
     train_dataset = datasets.ImageFolder(root="dataset/",
                                          transform=None)
     filenames = [s[0].split('/')[-1].replace('.jpg', '') for s in train_dataset.samples]
-    # print(filenames)
     embeddings = np.load('dataset/embeddings.npy')
-    # TODO: Normalize the embeddings across the dataset
+    # Normalize the embeddings across the dataset
 
     file_to_embedding = {}
     embeddings_max = embeddings.max()
     embeddings_min = embeddings.min()
-    # print(embeddings_max)
-    # print(embeddings_min)
+    
     for i in range(len(filenames)):
         # Original Code:
         # file_to_embedding[filenames[i]] = embeddings[i]
         
         # New Code:
         file_to_embedding[filenames[i]] = (embeddings[i]-embeddings_min)/(embeddings_max-embeddings_min)
-    # print(file_to_embedding)
-    # print(file_to_embedding['00000'])
-    # print(len(file_to_embedding['00000']))
 
     # file_to_embedding = {'00000': [0.3, 0.6, ..., 0.19], ...}
 
@@ -146,19 +115,10 @@ def get_data(file, train=True):
             y.append(0)
     X = np.vstack(X)
     y = np.hstack(y)
-    '''
-    print(X)
-    print(len(X))
-    print(X[0])
-    print(len(X[0]))
-    print(y)
-    print(len(y))
-    print(X[0][0])
-    '''
 
     return X, y
 
-# Hint: adjust batch_size and num_workers to your PC configuration, so that you don't run out of memory
+# Adjusting the batch_size and num_workers to your PC configuration, so that you don't run out of memory
 def create_loader_from_np(X, y = None, train = True, batch_size=64, shuffle=True, num_workers = 4):
     """
     Create a torch.utils.data.DataLoader object from numpy arrays containing the data.
@@ -179,7 +139,6 @@ def create_loader_from_np(X, y = None, train = True, batch_size=64, shuffle=True
                         pin_memory=True, num_workers=num_workers)
     return loader
 
-# TODO: define a model. Here, the basic structure is defined, but you need to fill in the details
 class Net(nn.Module):
     """
     The model class, which defines our classifier.
@@ -189,32 +148,7 @@ class Net(nn.Module):
         The constructor of the model.
         """
         super().__init__()
-        # Original Code:
-        # self.fc = nn.Linear(3000, 1)
-
-        '''
-        # New Code 1:
-        self.fc1 = nn.Linear(6144, 512)
-        self.fc2 = nn.Linear(512, 512)
-        self.fc3 = nn.Linear(512, 512)
-        self.out = nn.Linear(512, 1)
-        '''
         
-        '''
-        # New Code 2:
-        self.fc1 = nn.Linear(6144, 2048)
-        self.fc2 = nn.Linear(2048, 256)
-        self.out = nn.Linear(256, 1)
-        '''
-
-        '''
-        # New Code 3:
-        self.fc1 = nn.Linear(6144, 256)
-        self.fc2 = nn.Linear(256, 256)
-        self.out = nn.Linear(256, 1)
-        '''
-
-        # New Code 4:
         self.f1 = nn.Linear(6144, 768)
         self.f2 = nn.Linear(768, 96)
         self.out = nn.Linear(96, 1)
@@ -227,24 +161,6 @@ class Net(nn.Module):
 
         output: x: torch.Tensor, the output of the model
         """
-        # Original Code:
-        # x = self.fc(x)
-        # x = F.relu(x)
-
-        '''
-        # New Code 1:
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        x = self.out(x)
-        '''
-
-        '''
-        # New Code 2:
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.out(x)
-        '''
 
         # New Code 3:
         x = self.f1(x)
@@ -280,37 +196,8 @@ def train_model(train_loader):
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
     losses = []
     for epoch in range(n_epochs):
-        '''
-        # New Code 1
-        counter1 = 0
-        for [X, y] in train_loader:
-            if counter1 % 25 == 0:
-                y_pred = model.forward(X)
-                y = y.unsqueeze(1)
-                y = y.to(torch.float32)
-                loss = criterion(y_pred, y)
-                losses.append(loss)
-                # print(f'epoch: {i:2}  loss: {loss.item():10.8f}')
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
-            counter1 += 1
-        '''
-        '''
-        counter2 = 0
-        for [X, y] in train_loader:
-            if counter2 < 100:
-                y_pred = model.forward(X)
-                y = y.unsqueeze(1)
-                y = y.to(torch.float32)
-                loss = criterion(y_pred, y)
-                losses.append(loss)
-                counter2 += 1
-        '''
-
-        # print(f'epoch: {epoch:2}  loss: {loss.item():10.8f}')
-
-        # New Code 2
+        
+       
         for i, [X, y] in enumerate(train_loader):
             optimizer.zero_grad()
             y_pred = model.forward(X)
@@ -320,19 +207,6 @@ def train_model(train_loader):
             loss.backward()
             optimizer.step()
             losses.append(loss)
-        print(f'epoch: {epoch:2}  loss: {loss.item():10.8f}')
-        '''
-        for i, [X, y] in enumerate(train_loader):
-            if i % 10 != 0 and i < 200:
-                optimizer.zero_grad()
-                y_pred = model.forward(X)
-                y = y.unsqueeze(1)
-                y = y.to(torch.float32)
-                loss = criterion(y_pred, y)
-                loss.backward()
-                optimizer.step()
-                losses.append(loss)
-        '''
 
 
     return model
@@ -363,7 +237,7 @@ def test_model(model, loader):
     np.savetxt("results.txt", predictions, fmt='%i')
 
 
-# Main function. You don't have to change this
+# Main function
 if __name__ == '__main__':
     TRAIN_TRIPLETS = 'train_triplets.txt'
     TEST_TRIPLETS = 'test_triplets.txt'
