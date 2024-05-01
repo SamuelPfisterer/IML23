@@ -20,7 +20,5 @@ The approach incorporates transfer learning from a larger dataset to enhance the
 Utilizing Python and libraries like Pandas, NumPy, and PyTorch, the solution includes:
 - **Custom Load Function**: Efficiently imports data from provided CSV files into the working environment.
 - **Machine Learning Pipeline**:
-  - 
   - Pretraining a "feature" extractor based on the energy level data. This is implemted via a PyTorch neural network. 
-  - 
   - "RidgeCV" Scikit-Learn is used to finetune a last "layer", that predicts the HOMO-LUMO gaps based on the embedding from the pretrained model.
